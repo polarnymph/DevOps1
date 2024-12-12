@@ -19,9 +19,6 @@ services:
       context: .
     container_name: django_app
     restart: always
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
     environment:
       DATABASE_URL: postgres://django:django@db:5432/django_db
     ports:
