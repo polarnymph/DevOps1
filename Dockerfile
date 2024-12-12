@@ -16,9 +16,6 @@ COPY . .
 ENV DJANGO_SETTINGS_MODULE=myproject.settings
 ENV PYTHONUNBUFFERED=1
 
-# Выполняем миграции и собираем статику
-RUN python manage.py collectstatic --noinput
-
 # Открываем порт для приложения
 EXPOSE 8000
 
