@@ -1,22 +1,44 @@
 name: Django CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: mydatabase
+          POSTGRES_USER: myuser
+          POSTGRES_PASSWORD: mypassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
-    - name: Set up Docker Compose
+    env:
+      DATABASE_URL: postgres://myuser:mypassword@localhost:5432/mydatabase
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
       run: |
-        docker-compose up --build -d db
-        docker-compose run web python manage.py test
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run migrations
+      run: python manage.py migrate
+
+    - name: Run tests
+      run: python manage.py test
